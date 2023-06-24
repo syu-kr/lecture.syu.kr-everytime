@@ -17,27 +17,28 @@ import json
 import openpyxl
 from openpyxl.styles import Color, PatternFill
 
-YEAR = "2023"
-SEMESTER = "2학기 정규"
-
-DATA_FOLDER_NAME = "data/"
-
-if not os.path.exists(os.path.join(os.path.dirname(__file__), DATA_FOLDER_NAME)):
-  os.makedirs(os.path.join(os.path.dirname(__file__), DATA_FOLDER_NAME))
-
-API_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), DATA_FOLDER_NAME + "allAPI.json"))
-
+year = ""
+semester = ""
+folder_path = ""
 data_path = ""
 
 with open("config.json", "r", encoding = "utf-8") as f:
   JSON_DATA = json.load(f)
-  data_path = JSON_DATA["path"]
+  year = JSON_DATA["year"]
+  semester = JSON_DATA["semester"]
+  folder_path = JSON_DATA["folder-path"]
+  data_path = JSON_DATA["data-path"]
 
-REAL_PATH = data_path + "\\" + YEAR + "\\" + SEMESTER
+if not os.path.exists(os.path.join(os.path.dirname(__file__), folder_path)):
+  os.makedirs(os.path.join(os.path.dirname(__file__), folder_path))
+
+API_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + "allAPI.json"))
+
+REAL_PATH = data_path + "\\" + year + "\\" + semester
 ABS_PATH_1 = os.path.abspath(REAL_PATH)
 
-SAVE_NAME = YEAR + "년 " + SEMESTER + " 시간표"
-SAVE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), DATA_FOLDER_NAME + SAVE_NAME + ".xlsx"))
+SAVE_NAME = year + "년 " + semester + " 시간표"
+SAVE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + SAVE_NAME + ".xlsx"))
 
 allAPI = []
 
@@ -61,8 +62,8 @@ for college in os.listdir(ABS_PATH_1):
         allAPI.append(realData)
 
 apiJson = {}
-apiJson["year"] = YEAR
-apiJson["semester"] = SEMESTER
+apiJson["year"] = year
+apiJson["semester"] = semester
 apiJson["api"] = allAPI
 
 with open(API_PATH, "w", encoding = "utf-8") as f:
