@@ -17,6 +17,17 @@ import json
 import openpyxl
 from openpyxl.styles import Color, PatternFill
 
+from utils.Logger import Logger
+
+LOGGER = Logger()
+
+LOGGER.logo()
+
+RED_TEXT = "\033[1;91m"
+GREEN_TEXT = "\033[1;92m"
+YELLOW_TEXT = "\033[1;93m"
+RESET_TEXT = "\033[0m"
+
 year = ""
 semester = ""
 folder_path = ""
@@ -32,13 +43,14 @@ with open("config.json", "r", encoding = "utf-8") as f:
 if not os.path.exists(os.path.join(os.path.dirname(__file__), folder_path)):
   os.makedirs(os.path.join(os.path.dirname(__file__), folder_path))
 
-API_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + "allAPI.json"))
-
 REAL_PATH = data_path + "\\" + year + "\\" + semester
 ABS_PATH_1 = os.path.abspath(REAL_PATH)
 
-SAVE_NAME = year + "년 " + semester + " 시간표"
-SAVE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + SAVE_NAME + ".xlsx"))
+FILE_NAME = year + "년 " + semester + " 시간표"
+XLSX_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + FILE_NAME + ".xlsx"))
+JSON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), folder_path + FILE_NAME + ".json"))
+
+LOGGER.info(FILE_NAME)
 
 allAPI = []
 
@@ -56,6 +68,20 @@ for college in os.listdir(ABS_PATH_1):
     
     with open(ABS_PATH_3, "r", encoding = "utf-8") as f:
       DATA = json.load(f)
+      PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
+      PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
+      
+      with open(PREV_PATH, "r", encoding = "utf-8") as f:
+        PREV_DATA = json.load(f)
+        
+        if not DATA["api"]:
+          if not PREV_DATA["api"]:
+            LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + RED_TEXT + "확인되지 않음. (이전 연도 정보가 확인되지 않음.)" + RESET_TEXT)
+          else:
+            LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(len(PREV_DATA["api"])) + "개 정보가 확인됨.)" + RESET_TEXT)
+          continue
+        
+        LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + str(len(DATA["api"])) + "개 " + GREEN_TEXT + "확인 됨. " + YELLOW_TEXT + "(이전 연도 " + str(len(PREV_DATA["api"])) + "개 정보가 확인됨.)" + RESET_TEXT)
       
       for realData in DATA["api"]:
         realData["단과대학"] = college
@@ -66,7 +92,7 @@ apiJson["year"] = year
 apiJson["semester"] = semester
 apiJson["api"] = allAPI
 
-with open(API_PATH, "w", encoding = "utf-8") as f:
+with open(JSON_PATH, "w", encoding = "utf-8") as f:
   json.dump(apiJson, f, ensure_ascii = False, indent = 2)
 
 excelWB = openpyxl.Workbook()
@@ -107,7 +133,7 @@ sheet["J1"] = "수업시간"
 sheet["K1"] = "장소"
 sheet["L1"] = "단과대학"
 
-with open(API_PATH, "r", encoding = "utf-8") as f:
+with open(JSON_PATH, "r", encoding = "utf-8") as f:
   DATA = json.load(f)
   rowCount = 1
   
@@ -127,5 +153,8 @@ with open(API_PATH, "r", encoding = "utf-8") as f:
     sheet["K" + str(rowCount)] = realData["장소"]
     sheet["L" + str(rowCount)] = realData["단과대학"]
 
-excelWB.save(SAVE_PATH)
+excelWB.save(XLSX_PATH)
 excelWB.close()
+
+LOGGER.info(XLSX_PATH)
+LOGGER.info(JSON_PATH)
