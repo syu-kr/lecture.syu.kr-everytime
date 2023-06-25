@@ -26,12 +26,20 @@ LOGGER.logo()
 RED_TEXT = "\033[1;91m"
 GREEN_TEXT = "\033[1;92m"
 YELLOW_TEXT = "\033[1;93m"
+PURPLE_TEXT = "\033[45m"
 RESET_TEXT = "\033[0m"
 
 year = ""
 semester = ""
 folder_path = ""
 data_path = ""
+data_info = {
+  "count": 0,
+  "prev-pres-not-found": 0,
+  "prev-pres-not-found-list": [],
+  "prev-not-found": 0,
+  "prev-not-found-list": []
+}
 
 with open("config.json", "r", encoding = "utf-8") as f:
   JSON_DATA = json.load(f)
@@ -54,37 +62,51 @@ LOGGER.info(FILE_NAME)
 
 allAPI = []
 
-for college in os.listdir(ABS_PATH_1):
-  ABS_PATH_2 = os.path.abspath(ABS_PATH_1 + "\\" + college)
+for COLLEGE in os.listdir(ABS_PATH_1):
+  ABS_PATH_2 = os.path.abspath(ABS_PATH_1 + "\\" + COLLEGE)
   
-  if college == "전체대학":
+  if COLLEGE == "전체대학":
     continue
   
-  if college == "학부(과).json":
+  if COLLEGE == "학부(과).json":
     continue
   
-  for undergraduate in os.listdir(ABS_PATH_2):
-    ABS_PATH_3 = os.path.abspath(ABS_PATH_2 + "\\" + undergraduate)
+  for UNDERGRADUATE in os.listdir(ABS_PATH_2):
+    ABS_PATH_3 = os.path.abspath(ABS_PATH_2 + "\\" + UNDERGRADUATE)
     
     with open(ABS_PATH_3, "r", encoding = "utf-8") as f:
-      DATA = json.load(f)
+      PRES_DATA = json.load(f)
       PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
       PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
       
       with open(PREV_PATH, "r", encoding = "utf-8") as f:
         PREV_DATA = json.load(f)
+        GRAD_NAME = os.path.splitext(UNDERGRADUATE)[0]
+        PRES_COUNT = len(PRES_DATA["api"])
+        PREV_COUNT = len(PREV_DATA["api"])
         
-        if not DATA["api"]:
+        data_info["count"] += 1
+        
+        if not PRES_DATA["api"]:
           if not PREV_DATA["api"]:
-            LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + RED_TEXT + "확인되지 않음. (이전 연도 정보가 확인되지 않음.)" + RESET_TEXT)
+            data_info["prev-pres-not-found"] += 1
+            data_info["prev-pres-not-found-list"].append(GRAD_NAME)
+            LOGGER.info(GRAD_NAME + " 정보가 " + RED_TEXT + "확인되지 않음. (이전 연도 정보가 확인되지 않음.)" + RESET_TEXT)
           else:
-            LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(len(PREV_DATA["api"])) + "개 정보가 확인됨.)" + RESET_TEXT)
+            LOGGER.info(GRAD_NAME + " 정보가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 정보가 확인됨.)" + RESET_TEXT)
           continue
         
-        LOGGER.info(os.path.splitext(undergraduate)[0] + " 정보가 " + str(len(DATA["api"])) + "개 " + GREEN_TEXT + "확인 됨. " + YELLOW_TEXT + "(이전 연도 " + str(len(PREV_DATA["api"])) + "개 정보가 확인됨.)" + RESET_TEXT)
+        MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
+        
+        if not PREV_DATA["api"]:
+          data_info["prev-not-found"] += 1
+          data_info["prev-not-found-list"].append(GRAD_NAME)
+          LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + RED_TEXT + "(이전 연도 정보가 확인되지 않음.) " + MSG + RESET_TEXT)
+        else:
+          LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 정보가 확인됨.) " + MSG + RESET_TEXT)
       
-      for realData in DATA["api"]:
-        realData["단과대학"] = college
+      for realData in PRES_DATA["api"]:
+        realData["단과대학"] = COLLEGE
         allAPI.append(realData)
 
 apiJson = {}
@@ -134,10 +156,10 @@ sheet["K1"] = "장소"
 sheet["L1"] = "단과대학"
 
 with open(JSON_PATH, "r", encoding = "utf-8") as f:
-  DATA = json.load(f)
+  PRES_DATA = json.load(f)
   rowCount = 1
   
-  for realData in DATA["api"]:
+  for realData in PRES_DATA["api"]:
     rowCount += 1
     
     sheet["A" + str(rowCount)] = realData["강좌번호"]
@@ -158,3 +180,9 @@ excelWB.close()
 
 LOGGER.info(XLSX_PATH)
 LOGGER.info(JSON_PATH)
+
+LOGGER.info("총 " + str(data_info["count"]) + "개의 학부(과)가 검색되었습니다.")
+LOGGER.info("총 " + str(data_info["prev-pres-not-found"]) + "개의 학부(과)가 폐지된 과로 추정됩니다.")
+LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-pres-not-found-list"]) + RESET_TEXT)
+LOGGER.info("총 " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됩니다.")
+LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-not-found-list"]) + RESET_TEXT)
