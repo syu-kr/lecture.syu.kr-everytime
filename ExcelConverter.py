@@ -34,7 +34,8 @@ semester = ""
 folder_path = ""
 data_path = ""
 data_info = {
-  "count": 0,
+  "grad-count": 0,
+  "all-count": 0,
   "prev-pres-not-found": 0,
   "prev-pres-not-found-list": [],
   "prev-not-found": 0,
@@ -85,7 +86,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         PRES_COUNT = len(PRES_DATA["api"])
         PREV_COUNT = len(PREV_DATA["api"])
         
-        data_info["count"] += 1
+        data_info["grad-count"] += 1
         
         if not PRES_DATA["api"]:
           if not PREV_DATA["api"]:
@@ -104,6 +105,8 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + RED_TEXT + "(이전 연도 정보가 확인되지 않음.) " + MSG + RESET_TEXT)
         else:
           LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 정보가 확인됨.) " + MSG + RESET_TEXT)
+      
+      data_info["all-count"] += PRES_COUNT
       
       for realData in PRES_DATA["api"]:
         realData["단과대학"] = COLLEGE
@@ -181,7 +184,8 @@ excelWB.close()
 LOGGER.info(XLSX_PATH)
 LOGGER.info(JSON_PATH)
 
-LOGGER.info("총 " + str(data_info["count"]) + "개의 학부(과)가 검색되었습니다.")
+LOGGER.info("총 " + str(data_info["grad-count"]) + "개의 학부(과)가 검색되었습니다.")
+LOGGER.info("총 " + str(data_info["all-count"]) + "개의 강의가 검색되었습니다.")
 LOGGER.info("총 " + str(data_info["prev-pres-not-found"]) + "개의 학부(과)가 폐지된 과로 추정됩니다.")
 LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-pres-not-found-list"]) + RESET_TEXT)
 LOGGER.info("총 " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됩니다.")
