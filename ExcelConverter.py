@@ -70,6 +70,9 @@ allAPI = []
 for COLLEGE in os.listdir(ABS_PATH_1):
   ABS_PATH_2 = os.path.abspath(ABS_PATH_1 + "\\" + COLLEGE)
   
+  if COLLEGE == "수강편람":
+    continue
+  
   if COLLEGE == "전체대학":
     continue
   
