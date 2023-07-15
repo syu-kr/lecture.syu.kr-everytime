@@ -26,7 +26,10 @@ LOGGER.logo()
 RED_TEXT = "\033[1;91m"
 GREEN_TEXT = "\033[1;92m"
 YELLOW_TEXT = "\033[1;93m"
-PURPLE_TEXT = "\033[45m"
+RED_B_TEXT = "\033[41m"
+GREEN_B_TEXT = "\033[42m"
+BLUE_B_TEXT = "\033[44m"
+PURPLE_B_TEXT = "\033[45m"
 RESET_TEXT = "\033[0m"
 
 year = ""
@@ -72,7 +75,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
   
   if COLLEGE == "수강편람":
     continue
-  
+
   if COLLEGE == "전체대학":
     continue
   
@@ -81,6 +84,12 @@ for COLLEGE in os.listdir(ABS_PATH_1):
   
   for UNDERGRADUATE in os.listdir(ABS_PATH_2):
     ABS_PATH_3 = os.path.abspath(ABS_PATH_2 + "\\" + UNDERGRADUATE)
+    GRAD_NAME = os.path.splitext(UNDERGRADUATE)[0]
+    
+    LOGGER.info("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+    LOGGER.info("")
+    LOGGER.info(" > 단과대학: " + COLLEGE)
+    LOGGER.info(" > 학부(과): " + GRAD_NAME)
     
     with open(ABS_PATH_3, "r", encoding = "utf-8") as f:
       PRES_DATA = json.load(f)
@@ -89,7 +98,6 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       
       with open(PREV_PATH, "r", encoding = "utf-8") as f:
         PREV_DATA = json.load(f)
-        GRAD_NAME = os.path.splitext(UNDERGRADUATE)[0]
         PRES_COUNT = len(PRES_DATA["api"])
         PREV_COUNT = len(PREV_DATA["api"])
         
@@ -99,31 +107,54 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           if not PREV_DATA["api"]:
             data_info["prev-pres-not-found"] += 1
             data_info["prev-pres-not-found-list"].append(GRAD_NAME)
-            LOGGER.info(GRAD_NAME + " 정보가 " + RED_TEXT + "확인되지 않음. (이전 연도 정보가 확인되지 않음.)" + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. (이전 연도 확인되지 않음.)" + RESET_TEXT)
           else:
             data_info["prev-found"] += 1
             data_info["prev-found-list"].append(GRAD_NAME)
-            LOGGER.info(GRAD_NAME + " 정보가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 정보가 확인됨.)" + RESET_TEXT)
-          continue
-        
-        MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
-        
-        if not PREV_DATA["api"]:
-          data_info["prev-not-found"] += 1
-          data_info["prev-not-found-list"].append(GRAD_NAME)
-          LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + RED_TEXT + "(이전 연도 정보가 확인되지 않음.) " + MSG + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.)" + RESET_TEXT)
+          # continue
         else:
-          LOGGER.info(GRAD_NAME + " 정보가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인 됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 정보가 확인됨.) " + MSG + RESET_TEXT)
+          MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
+          
+          if not PREV_DATA["api"]:
+            data_info["prev-not-found"] += 1
+            data_info["prev-not-found-list"].append(GRAD_NAME)
+            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + RED_TEXT + "(이전 연도 확인되지 않음.) " + MSG + RESET_TEXT)
+          else:
+            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.) " + MSG + RESET_TEXT)
       
-      data_info["prev-all-count"] += PREV_COUNT
       data_info["pres-all-count"] += PRES_COUNT
+      data_info["prev-all-count"] += PREV_COUNT
+      
+      MANUAL_COUNT = 0
       
       for realData in PRES_DATA["api"]:
         if not realData["교수명"] and not realData["수업시간"]:
           data_info["pres-warning"] += 1
         
         realData["단과대학"] = COLLEGE
+        realData["비고"] = ""
+        realData["팀티칭여부"] = ""
+        
+        MANUAL_PATH = os.path.abspath(ABS_PATH_1 + "\\" + "수강편람" + "\\" + UNDERGRADUATE)
+        
+        with open(MANUAL_PATH, "r", encoding = "utf-8") as f:
+          MANUAL_DATA = json.load(f)
+          MANUAL_COUNT = len(MANUAL_DATA["api"])
+          
+          for newData in MANUAL_DATA["api"]:
+            if newData["과목코드"] == realData["과목코드"]:
+              realData["비고"] = newData["비고"]
+              realData["팀티칭여부"] = newData["팀티칭여부"]
+
         allAPI.append(realData)
+      
+      MSG = RED_B_TEXT + "(실패)" if PRES_COUNT == 0 or MANUAL_COUNT == 0 else BLUE_B_TEXT + "(통과)" if PRES_COUNT == MANUAL_COUNT else RED_B_TEXT + "(실패) - 누락 확인 바람"
+      LOGGER.info(" > 수강 편람이 " + str(MANUAL_COUNT) + "개 확인됨. ")
+      LOGGER.info(" > 상태: " + MSG + RESET_TEXT)
+    
+    LOGGER.info("")
+    LOGGER.info("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 
 apiJson = {}
 apiJson["year"] = year
@@ -136,12 +167,18 @@ with open(JSON_PATH, "w", encoding = "utf-8") as f:
 excelWB = openpyxl.Workbook()
 sheet = excelWB.active
 
+sheet.column_dimensions["A"].width = 9 # 강좌번호
+sheet.column_dimensions["B"].width = 9 # 과목코드
 sheet.column_dimensions["C"].width = 35 # 과목명
 sheet.column_dimensions["D"].width = 18 # 학부(과)
+sheet.column_dimensions["E"].width = 5 # 학년
+sheet.column_dimensions["F"].width = 9 # 이수구분
 sheet.column_dimensions["G"].width = 15 # 영역구분
-sheet.column_dimensions["I"].width = 15 # 교수명
+sheet.column_dimensions["H"].width = 5 # 학점
+sheet.column_dimensions["I"].width = 7 # 교수명
 sheet.column_dimensions["J"].width = 15 # 수업시간
 sheet.column_dimensions["K"].width = 30 # 장소
+sheet.column_dimensions["M"].width = 25 # 비고
 
 sheet["A1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["B1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
@@ -155,6 +192,8 @@ sheet["I1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["J1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["K1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["L1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
+sheet["M1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
+sheet["N1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 
 sheet.freeze_panes = "A2"
 
@@ -170,6 +209,8 @@ sheet["I1"] = "교수명"
 sheet["J1"] = "수업시간"
 sheet["K1"] = "장소"
 sheet["L1"] = "단과대학"
+sheet["M1"] = "비고"
+sheet["N1"] = "팀티칭여부"
 
 with open(JSON_PATH, "r", encoding = "utf-8") as f:
   PRES_DATA = json.load(f)
@@ -190,24 +231,30 @@ with open(JSON_PATH, "r", encoding = "utf-8") as f:
     sheet["J" + str(rowCount)] = realData["수업시간"]
     sheet["K" + str(rowCount)] = realData["장소"]
     sheet["L" + str(rowCount)] = realData["단과대학"]
+    sheet["L" + str(rowCount)] = realData["단과대학"]
+    sheet["M" + str(rowCount)] = realData["비고"]
+    sheet["N" + str(rowCount)] = realData["팀티칭여부"]
 
 excelWB.save(XLSX_PATH)
 excelWB.close()
 
-LOGGER.info(XLSX_PATH)
-LOGGER.info(JSON_PATH)
-
-LOGGER.info("총 " + str(data_info["grad-count"]) + "개의 학부(과)가 검색되었습니다.")
-LOGGER.info("올해 총 " + str(data_info["pres-all-count"]) + "개의 강의가 검색되었습니다.")
-LOGGER.info("작년 총 " + str(data_info["prev-all-count"]) + "개의 강의가 검색되었습니다.")
-LOGGER.info("총 " + str(data_info["prev-found"]) + "개의 학부(과)가 강의 계획서가 없는 것으로 추정됩니다.")
-LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-found-list"]) + RESET_TEXT)
-LOGGER.info("총 " + str(data_info["prev-pres-not-found"]) + "개의 학부(과)가 폐지된 과로 추정됩니다.")
-LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-pres-not-found-list"]) + RESET_TEXT)
-LOGGER.info("총 " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됩니다.")
-LOGGER.info(PURPLE_TEXT + ", ".join(data_info["prev-not-found-list"]) + RESET_TEXT)
+LOGGER.info("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+LOGGER.info("")
+LOGGER.info(" > JSON PATH: " + JSON_PATH)
+LOGGER.info(" > XLSX PATH: " + XLSX_PATH)
+LOGGER.info(" > 전체 학부(과): " + str(data_info["grad-count"]) + "개 확인됨.")
+LOGGER.info(" > 올해 전체 강의: " + str(data_info["pres-all-count"]) + "개 확인됨.")
+LOGGER.info(" > 작년 전체 강의: " + str(data_info["prev-all-count"]) + "개 확인됨.")
+LOGGER.info(" > " + str(data_info["prev-found"]) + "개의 학부(과)가 강의 계획서가 없는 것으로 추정됨.")
+LOGGER.info(" > " + PURPLE_B_TEXT + ", ".join(data_info["prev-found-list"]) + RESET_TEXT)
+LOGGER.info(" > " + str(data_info["prev-pres-not-found"]) + "개의 학부(과)가 폐지된 과로 추정됨.")
+LOGGER.info(" > " + RED_B_TEXT + ", ".join(data_info["prev-pres-not-found-list"]) + RESET_TEXT)
+LOGGER.info(" > " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됨.")
+LOGGER.info(" > " + GREEN_B_TEXT + ", ".join(data_info["prev-not-found-list"]) + RESET_TEXT)
 
 VALUE = (data_info["pres-warning"] / data_info["pres-all-count"]) * 100
-MSG = GREEN_TEXT + "에브리타임 파일 업로드 적합" if VALUE < 15 else RED_TEXT + "에브리타임 파일 업로드 부적합"
-LOGGER.info("총 " + str(data_info["pres-all-count"]) + "개의 강의 중 교수와 시간이 정해지지 않은 " + str(data_info["pres-warning"]) + "개의 강의가 검색되었습니다.")
-LOGGER.info("상태: " + MSG + " (" + str(int(VALUE)) + "%) " + RESET_TEXT)
+MSG = BLUE_B_TEXT + "에브리타임 시간표 업데이트 통과" if VALUE < 15 else RED_B_TEXT + "에브리타임 시간표 업데이트 실패"
+LOGGER.info(" > " + str(data_info["pres-all-count"]) + "개의 강의 중 교수와 시간이 정해지지 않은 " + str(data_info["pres-warning"]) + "개의 강의가 확인됨.")
+LOGGER.info(" > 상태: " + MSG + " (" + str(int(VALUE)) + "%)" + RESET_TEXT)
+LOGGER.info("")
+LOGGER.info("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
