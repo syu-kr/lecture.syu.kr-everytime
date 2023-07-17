@@ -143,9 +143,10 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           MANUAL_COUNT = len(MANUAL_DATA["api"])
           
           for newData in MANUAL_DATA["api"]:
-            if newData["과목코드"] == realData["과목코드"]:
+            if newData["강좌번호"] == realData["강좌번호"]:
               realData["비고"] = newData["비고"]
               realData["팀티칭여부"] = newData["팀티칭여부"]
+              break
 
         allAPI.append(realData)
       
