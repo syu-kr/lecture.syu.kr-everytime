@@ -237,7 +237,8 @@ sheet.column_dimensions["H"].width = 5 # 학점
 sheet.column_dimensions["I"].width = 7 # 교수명
 sheet.column_dimensions["J"].width = 15 # 수업시간
 sheet.column_dimensions["K"].width = 30 # 장소
-sheet.column_dimensions["M"].width = 25 # 비고
+sheet.column_dimensions["L"].width = 12 # 단과대학
+# sheet.column_dimensions["M"].width = 25 # 비고
 
 sheet["A1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["B1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
