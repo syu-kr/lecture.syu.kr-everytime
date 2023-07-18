@@ -128,6 +128,12 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       
       MANUAL_COUNT = 0
       
+      dfoundList = []
+      mfoundList = []
+      
+      direction = {}
+      manual = {}
+      
       for realData in PRES_DATA["api"]:
         if not realData["교수명"] and not realData["수업시간"]:
           data_info["pres-warning"] += 1
@@ -135,6 +141,17 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         realData["단과대학"] = COLLEGE
         realData["비고"] = ""
         realData["팀티칭여부"] = ""
+        
+        dfoundList.append(realData["강좌번호"])
+        
+        if realData["강좌번호"] in direction:
+          direction[realData["강좌번호"]]["count"] += 1
+        else:
+          direction[realData["강좌번호"]] = {}
+          direction[realData["강좌번호"]]["과목명"] = realData["과목명"]
+          direction[realData["강좌번호"]]["count"] = 1
+        
+        manual = {}
         
         MANUAL_PATH = os.path.abspath(ABS_PATH_1 + "\\" + "수강편람" + "\\" + UNDERGRADUATE)
         
@@ -146,13 +163,54 @@ for COLLEGE in os.listdir(ABS_PATH_1):
             if newData["강좌번호"] == realData["강좌번호"]:
               realData["비고"] = newData["비고"]
               realData["팀티칭여부"] = newData["팀티칭여부"]
-              break
+            
+            if newData["강좌번호"] in manual:
+              manual[newData["강좌번호"]]["count"] += 1
+            else:
+              manual[newData["강좌번호"]] = {}
+              manual[newData["강좌번호"]]["과목명"] = newData["과목명"]
+              manual[newData["강좌번호"]]["count"] = 1
 
         allAPI.append(realData)
       
-      MSG = RED_B_TEXT + "(실패)" if PRES_COUNT == 0 or MANUAL_COUNT == 0 else BLUE_B_TEXT + "(통과)" if PRES_COUNT == MANUAL_COUNT else RED_B_TEXT + "(실패) - 누락 확인 바람"
+      directionCount = 0
+      
+      for key, value in direction.items():
+        if value["count"] > 1:
+          directionCount += value["count"] - 1
+          LOGGER.warnning(" >> " + RED_TEXT + "강의 계획서에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
+      
+      if MANUAL_COUNT != 0:
+        with open(MANUAL_PATH, "r", encoding = "utf-8") as f:
+          MANUAL_DATA = json.load(f)
+          
+          for newData in MANUAL_DATA["api"]:
+            mfoundList.append(newData["강좌번호"])
+            
+            if not newData["강좌번호"] in dfoundList:
+              LOGGER.warnning(" >> " + RED_TEXT + " 강의 계획서에서 누락된 강좌가 발견되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
+        
+        for realData in PRES_DATA["api"]:
+          if not realData["강좌번호"] in mfoundList:
+            LOGGER.warnning(" >> " + RED_TEXT + " 수강 편람에서 누락된 강좌가 발견되었습니다. 강좌번호: " + realData["강좌번호"] + ", 과목명: " + realData["과목명"])
+      
+      MSG = RED_B_TEXT + "(실패) 데이터 값 없음" if PRES_COUNT == 0 or MANUAL_COUNT == 0 else BLUE_B_TEXT + "(통과)" if PRES_COUNT == MANUAL_COUNT else RED_B_TEXT + "(실패) 누락 확인 바람"
       LOGGER.info(" > 수강 편람이 " + str(MANUAL_COUNT) + "개 확인됨. ")
+      
+      manualCount = 0
+      
+      for key, value in manual.items():
+        if value["count"] > 1:
+          manualCount += value["count"] - 1
+          LOGGER.warnning(" >> " + RED_TEXT + "수강 편람에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
+      
       LOGGER.info(" > 상태: " + MSG + RESET_TEXT)
+      DIRECT_COUNT = PRES_COUNT - directionCount
+      MANUAL_COUNT = MANUAL_COUNT - manualCount
+      D_M = DIRECT_COUNT - MANUAL_COUNT
+      
+      MSG = BLUE_B_TEXT + "(통과)" if D_M == 0 else RED_B_TEXT + "(실패)"
+      LOGGER.info(" > 진단: " + MSG + RESET_TEXT + ", " + str(DIRECT_COUNT) + " - " + str(MANUAL_COUNT) + " = " + str(D_M))
     
     LOGGER.info("")
     LOGGER.info("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")

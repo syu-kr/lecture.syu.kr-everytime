@@ -41,8 +41,11 @@ class Logger:
     sys.stdout.write(logo + "\n")
   
   def info(self, text: str) -> None:
-    sys.stdout.write("[" + self.getTime() + "] [INFO] " + text + "\n")
+    sys.stdout.write("[" + self.getTime() + "] [INFO] " + text + "\033[0m" + "\n")
+  
+  def warnning(self, text: str) -> None:
+    sys.stdout.write("[" + self.getTime() + "] [WARNNING] " + text + "\033[0m" + "\n")
   
   def debuggerInfo(self, text: str) -> None:
-    sys.stdout.write("[" + self.getTime() + "] [DEBUG] " + text + "\n")
+    sys.stdout.write("[" + self.getTime() + "] [DEBUG] " + text + "\033[0m" + "\n")
   
