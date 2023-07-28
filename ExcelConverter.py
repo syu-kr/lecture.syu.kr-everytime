@@ -46,7 +46,8 @@ data_info = {
   "prev-not-found-list": [],
   "prev-found": 0,
   "prev-found-list": [],
-  "pres-warning": 0
+  "pres-warning": 0,
+  "check-warning": 0
 }
 
 with open("config.json", "r", encoding = "utf-8") as f:
@@ -107,11 +108,11 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           if not PREV_DATA["api"]:
             data_info["prev-pres-not-found"] += 1
             data_info["prev-pres-not-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. (이전 연도 확인되지 않음.)" + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. (이전 연도 확인되지 않음.)")
           else:
             data_info["prev-found"] += 1
             data_info["prev-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.)" + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.)")
           # continue
         else:
           MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
@@ -119,9 +120,9 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           if not PREV_DATA["api"]:
             data_info["prev-not-found"] += 1
             data_info["prev-not-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + RED_TEXT + "(이전 연도 확인되지 않음.) " + MSG + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + RED_TEXT + "(이전 연도 확인되지 않음.) " + MSG)
           else:
-            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.) " + MSG + RESET_TEXT)
+            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.) " + MSG)
       
       data_info["pres-all-count"] += PRES_COUNT
       data_info["prev-all-count"] += PREV_COUNT
@@ -204,13 +205,20 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           manualCount += value["count"] - 1
           LOGGER.warnning(" >> " + RED_TEXT + "수강 편람에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
       
-      LOGGER.info(" > 상태: " + MSG + RESET_TEXT)
+      LOGGER.info(" > 상태: " + MSG)
       DIRECT_COUNT = PRES_COUNT - directionCount
       MANUAL_COUNT = MANUAL_COUNT - manualCount
       D_M = DIRECT_COUNT - MANUAL_COUNT
       
-      MSG = BLUE_B_TEXT + "(통과)" if D_M == 0 else RED_B_TEXT + "(실패)"
-      LOGGER.info(" > 진단: " + MSG + RESET_TEXT + ", " + str(DIRECT_COUNT) + " - " + str(MANUAL_COUNT) + " = " + str(D_M))
+      MSG = ""
+      
+      if D_M == 0:
+        MSG = BLUE_B_TEXT + "(통과)"
+      else:
+        MSG = RED_B_TEXT + "(실패)"
+        data_info["check-warning"] += 1
+      
+      LOGGER.info(" > 진단: " + MSG + ", " + str(DIRECT_COUNT) + " - " + str(MANUAL_COUNT) + " = " + str(D_M))
     
     LOGGER.info("")
     LOGGER.info("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
@@ -306,15 +314,16 @@ LOGGER.info(" > 전체 학부(과): " + str(data_info["grad-count"]) + "개 확�
 LOGGER.info(" > 올해 전체 강의: " + str(data_info["pres-all-count"]) + "개 확인됨.")
 LOGGER.info(" > 작년 전체 강의: " + str(data_info["prev-all-count"]) + "개 확인됨.")
 LOGGER.info(" > " + str(data_info["prev-found"]) + "개의 학부(과)가 강의 계획서가 없는 것으로 추정됨.")
-LOGGER.info(" > " + PURPLE_B_TEXT + ", ".join(data_info["prev-found-list"]) + RESET_TEXT)
+LOGGER.info(" > " + PURPLE_B_TEXT + ", ".join(data_info["prev-found-list"]))
 LOGGER.info(" > " + str(data_info["prev-pres-not-found"]) + "개의 학부(과)가 폐지된 과로 추정됨.")
-LOGGER.info(" > " + RED_B_TEXT + ", ".join(data_info["prev-pres-not-found-list"]) + RESET_TEXT)
+LOGGER.info(" > " + RED_B_TEXT + ", ".join(data_info["prev-pres-not-found-list"]))
 LOGGER.info(" > " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됨.")
-LOGGER.info(" > " + GREEN_B_TEXT + ", ".join(data_info["prev-not-found-list"]) + RESET_TEXT)
+LOGGER.info(" > " + GREEN_B_TEXT + ", ".join(data_info["prev-not-found-list"]))
 
 VALUE = (data_info["pres-warning"] / data_info["pres-all-count"]) * 100
 MSG = BLUE_B_TEXT + "에브리타임 시간표 업데이트 통과" if VALUE < 15 else RED_B_TEXT + "에브리타임 시간표 업데이트 실패"
 LOGGER.info(" > " + str(data_info["pres-all-count"]) + "개의 강의 중 교수와 시간이 정해지지 않은 " + str(data_info["pres-warning"]) + "개의 강의가 확인됨.")
-LOGGER.info(" > 상태: " + MSG + " (" + str(int(VALUE)) + "%)" + RESET_TEXT)
+LOGGER.info(" > 상태: " + MSG + " (" + str(int(VALUE)) + "%)")
+LOGGER.info(" > 진단: " + str(data_info["check-warning"]) + "개의 학부(과)가 진단에 실패했습니다.")
 LOGGER.info("")
 LOGGER.info("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
