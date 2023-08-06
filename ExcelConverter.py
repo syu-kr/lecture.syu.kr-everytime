@@ -50,6 +50,17 @@ data_info = {
   "check-warning": 0
 }
 
+if not os.path.exists("config.json"):
+  configData = {
+    "year": "",
+    "semester": "",
+    "folder-path": "",
+    "data-path": "",
+  }
+  
+  with open("config.json", "w", encoding = "utf-8") as f:
+    json.dump(configData, f, ensure_ascii = False, indent = 2)
+
 with open("config.json", "r", encoding = "utf-8") as f:
   JSON_DATA = json.load(f)
   year = JSON_DATA["year"]
@@ -74,13 +85,7 @@ allAPI = []
 for COLLEGE in os.listdir(ABS_PATH_1):
   ABS_PATH_2 = os.path.abspath(ABS_PATH_1 + "\\" + COLLEGE)
   
-  if COLLEGE == "수강편람":
-    continue
-
-  if COLLEGE == "전체대학":
-    continue
-  
-  if COLLEGE == "학부(과).json":
+  if COLLEGE == "수강편람" or COLLEGE == "전체대학" or COLLEGE == "학부(과).json":
     continue
   
   for UNDERGRADUATE in os.listdir(ABS_PATH_2):
