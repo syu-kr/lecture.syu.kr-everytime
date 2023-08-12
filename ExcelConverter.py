@@ -172,6 +172,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
               manual[newData["강좌번호"]]["과목명"] = newData["과목명"]
               manual[newData["강좌번호"]]["count"] = 1
 
+        del realData['순번']
         allAPI.append(realData)
       
       directionCount = 0
