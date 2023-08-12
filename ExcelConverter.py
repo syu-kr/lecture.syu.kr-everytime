@@ -144,9 +144,9 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         if not realData["교수명"] and not realData["수업시간"]:
           data_info["pres-warning"] += 1
         
-        realData["단과대학"] = COLLEGE
         realData["비고"] = ""
         realData["팀티칭여부"] = ""
+        realData["단과대학"] = COLLEGE
         
         dfoundList.append(realData["강좌번호"])
         
