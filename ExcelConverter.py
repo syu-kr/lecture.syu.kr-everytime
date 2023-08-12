@@ -232,7 +232,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
 apiJson = {}
 apiJson["year"] = year
 apiJson["semester"] = semester
-apiJson["api"] = allAPI
+apiJson["api"] = sorted(allAPI, key=lambda i: (i["단과대학"], i["학부(과)"], int(i["학년"]), int(i["학점"])))
 
 with open(JSON_PATH, "w", encoding = "utf-8") as f:
   json.dump(apiJson, f, ensure_ascii = False, indent = 2)
