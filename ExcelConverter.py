@@ -196,11 +196,15 @@ for COLLEGE in os.listdir(ABS_PATH_1):
             mfoundList.append(newData["강좌번호"])
             
             if not newData["강좌번호"] in dfoundList:
-              LOGGER.warnning(" >> " + RED_TEXT + " 강의 계획서에서 누락된 강좌가 발견되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
+              newData["단과대학"] = COLLEGE
+              del newData['순번']
+              allAPI.append(newData)
+              LOGGER.warnning(" >> " + RED_TEXT + "강의 계획서에서 누락된 강좌가 발견되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
+              LOGGER.warnning(" >> " + PURPLE_B_TEXT + "누락된 강좌가 발견되어 데이터가 추가되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
         
         for realData in PRES_DATA["api"]:
           if not realData["강좌번호"] in mfoundList:
-            LOGGER.warnning(" >> " + RED_TEXT + " 수강 편람에서 누락된 강좌가 발견되었습니다. 강좌번호: " + realData["강좌번호"] + ", 과목명: " + realData["과목명"])
+            LOGGER.warnning(" >> " + RED_TEXT + "수강 편람에서 누락된 강좌가 발견되었습니다. 강좌번호: " + realData["강좌번호"] + ", 과목명: " + realData["과목명"])
       
       MSG = RED_B_TEXT + "(실패) 데이터 값 없음" if PRES_COUNT == 0 or MANUAL_COUNT == 0 else BLUE_B_TEXT + "(통과)" if PRES_COUNT == MANUAL_COUNT else RED_B_TEXT + "(실패) 누락 확인 바람"
       LOGGER.info(" > 수강 편람이 " + str(MANUAL_COUNT) + "개 확인됨. ")
