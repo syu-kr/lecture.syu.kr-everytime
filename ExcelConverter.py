@@ -58,10 +58,10 @@ if not os.path.exists("config.json"):
     "data-path": "",
   }
   
-  with open("config.json", "w", encoding = "utf-8") as f:
-    json.dump(configData, f, ensure_ascii = False, indent = 2)
+  with open("config.json", "w", encoding="utf-8") as f:
+    json.dump(configData, f, ensure_ascii=False, indent=2)
 
-with open("config.json", "r", encoding = "utf-8") as f:
+with open("config.json", "r", encoding="utf-8") as f:
   JSON_DATA = json.load(f)
   year = JSON_DATA["year"]
   semester = JSON_DATA["semester"]
@@ -97,12 +97,12 @@ for COLLEGE in os.listdir(ABS_PATH_1):
     LOGGER.info(" > 단과대학: " + COLLEGE)
     LOGGER.info(" > 학부(과): " + GRAD_NAME)
     
-    with open(ABS_PATH_3, "r", encoding = "utf-8") as f:
+    with open(ABS_PATH_3, "r", encoding="utf-8") as f:
       PRES_DATA = json.load(f)
       PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
       PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
       
-      with open(PREV_PATH, "r", encoding = "utf-8") as f:
+      with open(PREV_PATH, "r", encoding="utf-8") as f:
         PREV_DATA = json.load(f)
         PRES_COUNT = len(PRES_DATA["api"])
         PREV_COUNT = len(PREV_DATA["api"])
@@ -161,7 +161,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         
         MANUAL_PATH = os.path.abspath(ABS_PATH_1 + "\\" + "수강편람" + "\\" + UNDERGRADUATE)
         
-        with open(MANUAL_PATH, "r", encoding = "utf-8") as f:
+        with open(MANUAL_PATH, "r", encoding="utf-8") as f:
           MANUAL_DATA = json.load(f)
           MANUAL_COUNT = len(MANUAL_DATA["api"])
           
@@ -189,7 +189,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           LOGGER.warnning(" >> " + RED_TEXT + "강의 계획서에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
       
       if MANUAL_COUNT != 0:
-        with open(MANUAL_PATH, "r", encoding = "utf-8") as f:
+        with open(MANUAL_PATH, "r", encoding="utf-8") as f:
           MANUAL_DATA = json.load(f)
           
           for newData in MANUAL_DATA["api"]:
@@ -233,10 +233,10 @@ for COLLEGE in os.listdir(ABS_PATH_1):
 apiJson = {}
 apiJson["year"] = year
 apiJson["semester"] = semester
-apiJson["api"] = sorted(allAPI, key=lambda i: (i["단과대학"], i["학부(과)"], int(i["학년"]), int(i["학점"]), i["과목명"], i["강좌번호"]))
+apiJson["api"] = sorted(allAPI, key=lambda i: (i["단과대학"], i["학부(과)"], 1 if i["과목명"] != "채플" else -1, int(i["학년"]), int(i["학점"]), i["과목명"], int(i["강좌번호"])))
 
-with open(JSON_PATH, "w", encoding = "utf-8") as f:
-  json.dump(apiJson, f, ensure_ascii = False, indent = 2)
+with open(JSON_PATH, "w", encoding="utf-8") as f:
+  json.dump(apiJson, f, ensure_ascii=False, indent=2)
 
 excelWB = openpyxl.Workbook()
 sheet = excelWB.active
@@ -287,7 +287,7 @@ sheet["L1"] = "단과대학"
 sheet["M1"] = "비고"
 sheet["N1"] = "팀티칭여부"
 
-with open(JSON_PATH, "r", encoding = "utf-8") as f:
+with open(JSON_PATH, "r", encoding="utf-8") as f:
   PRES_DATA = json.load(f)
   rowCount = 1
   
