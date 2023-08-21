@@ -16,6 +16,7 @@ import os
 import json
 import openpyxl
 from openpyxl.styles import Color, PatternFill
+from openpyxl.utils import get_column_letter
 
 from utils.Logger import Logger
 
@@ -144,7 +145,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         if not realData["교수명"] and not realData["수업시간"]:
           data_info["pres-warning"] += 1
         
-        realData["비고"] = ""
+        realData["비고"] = realData["이수구분"] if realData["이수구분"] == "교직필수" else realData["영역구분"]
         realData["팀티칭여부"] = ""
         realData["단과대학"] = COLLEGE
         
@@ -167,7 +168,8 @@ for COLLEGE in os.listdir(ABS_PATH_1):
           
           for newData in MANUAL_DATA["api"]:
             if newData["강좌번호"] == realData["강좌번호"]:
-              realData["비고"] = newData["비고"]
+              realData["비고"] = newData["비고"] if realData["비고"] == "" else realData["비고"] if newData["비고"] == "" else realData["비고"] + ", " + newData["비고"]
+              # realData["비고"] = realData["비고"] + ", " + newData["비고"] if realData["비고"] != "" and newData["비고"] != "" else newData["비고"]
               realData["팀티칭여부"] = newData["팀티칭여부"]
             
             if newData["강좌번호"] in manual:
@@ -254,7 +256,7 @@ sheet.column_dimensions["F"].width = 9 # 이수구분
 sheet.column_dimensions["G"].width = 15 # 영역구분
 sheet.column_dimensions["H"].width = 5 # 학점
 sheet.column_dimensions["I"].width = 7 # 교수명
-sheet.column_dimensions["J"].width = 15 # 수업시간
+sheet.column_dimensions["J"].width = 12 # 수업시간
 sheet.column_dimensions["K"].width = 30 # 장소
 sheet.column_dimensions["L"].width = 12 # 단과대학
 # sheet.column_dimensions["M"].width = 25 # 비고
@@ -313,7 +315,7 @@ with open(JSON_PATH, "r", encoding="utf-8") as f:
     sheet["L" + str(rowCount)] = realData["단과대학"]
     sheet["M" + str(rowCount)] = realData["비고"]
     sheet["N" + str(rowCount)] = realData["팀티칭여부"]
-
+    
 excelWB.save(XLSX_PATH)
 excelWB.close()
 
