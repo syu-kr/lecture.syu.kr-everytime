@@ -47,7 +47,8 @@ data_info = {
   "prev-not-found-list": [],
   "prev-found": 0,
   "prev-found-list": [],
-  "pres-warning": 0,
+  "pres-warning-1": 0,
+  "pres-warning-2": 0,
   "check-warning": 0
 }
 
@@ -142,8 +143,11 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       manual = {}
       
       for realData in PRES_DATA["api"]:
-        if not realData["교수명"] and not realData["수업시간"]:
-          data_info["pres-warning"] += 1
+        if (not realData["교수명"] or realData["교수명"] == "미지정") and (not realData["수업시간"] or realData["수업시간"] == "미지정"):
+          data_info["pres-warning-1"] += 1
+        
+        if not realData["장소"] or realData["장소"] == "미지정":
+          data_info["pres-warning-2"] += 1
         
         realData["비고"] = realData["이수구분"] if realData["이수구분"] == "교직필수" else realData["영역구분"]
         realData["팀티칭여부"] = ""
@@ -333,9 +337,10 @@ LOGGER.info(" > " + RED_B_TEXT + ", ".join(data_info["prev-pres-not-found-list"]
 LOGGER.info(" > " + str(data_info["prev-not-found"]) + "개의 학부(과)가 신설된 과로 추정됨.")
 LOGGER.info(" > " + GREEN_B_TEXT + ", ".join(data_info["prev-not-found-list"]))
 
-VALUE = (data_info["pres-warning"] / data_info["pres-all-count"]) * 100
+VALUE = (data_info["pres-warning-1"] / data_info["pres-all-count"]) * 100
 MSG = BLUE_B_TEXT + "에브리타임 시간표 업데이트 통과" if VALUE < 15 else RED_B_TEXT + "에브리타임 시간표 업데이트 실패"
-LOGGER.info(" > " + str(data_info["pres-all-count"]) + "개의 강의 중 교수와 시간이 정해지지 않은 " + str(data_info["pres-warning"]) + "개의 강의가 확인됨.")
+LOGGER.info(" > " + str(data_info["pres-all-count"]) + "개의 강의 중 교수와 시간이 정해지지 않은 " + str(data_info["pres-warning-1"]) + "개의 강의가 확인됨.")
+LOGGER.info(" > " + str(data_info["pres-all-count"]) + "개의 강의 중 장소가 정해지지 않은 " + str(data_info["pres-warning-2"]) + "개의 강의가 확인됨.")
 LOGGER.info(" > 상태: " + MSG + " (" + str(int(VALUE)) + "%)")
 LOGGER.info(" > 진단: " + str(data_info["check-warning"]) + "개의 학부(과)가 진단에 실패했습니다.")
 LOGGER.info("")
