@@ -104,32 +104,35 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
       PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
       
-      with open(PREV_PATH, "r", encoding="utf-8") as f:
-        PREV_DATA = json.load(f)
-        PRES_COUNT = len(PRES_DATA["api"])
-        PREV_COUNT = len(PREV_DATA["api"])
-        
-        data_info["grad-count"] += 1
-        
-        if not PRES_DATA["api"]:
-          if not PREV_DATA["api"]:
-            data_info["prev-pres-not-found"] += 1
-            data_info["prev-pres-not-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. (이전 연도 확인되지 않음.)")
-          else:
-            data_info["prev-found"] += 1
-            data_info["prev-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.)")
-          # continue
-        else:
-          MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
+      try:
+        with open(PREV_PATH, "r", encoding="utf-8") as f:
+          PREV_DATA = json.load(f)
+          PRES_COUNT = len(PRES_DATA["api"])
+          PREV_COUNT = len(PREV_DATA["api"])
           
-          if not PREV_DATA["api"]:
-            data_info["prev-not-found"] += 1
-            data_info["prev-not-found-list"].append(GRAD_NAME)
-            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + RED_TEXT + "(이전 연도 확인되지 않음.) " + MSG)
+          data_info["grad-count"] += 1
+          
+          if not PRES_DATA["api"]:
+            if not PREV_DATA["api"]:
+              data_info["prev-pres-not-found"] += 1
+              data_info["prev-pres-not-found-list"].append(GRAD_NAME)
+              LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. (이전 연도 확인되지 않음.)")
+            else:
+              data_info["prev-found"] += 1
+              data_info["prev-found-list"].append(GRAD_NAME)
+              LOGGER.info(" > 강의 계획서가 " + RED_TEXT + "확인되지 않음. " + GREEN_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.)")
+            # continue
           else:
-            LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.) " + MSG)
+            MSG = "(" + str(PRES_COUNT - PREV_COUNT) + "개 증가)" if PRES_COUNT > PREV_COUNT else "(변화 없음)" if PRES_COUNT == PREV_COUNT else "(" + str(PREV_COUNT - PRES_COUNT) + "개 감소)"
+            
+            if not PREV_DATA["api"]:
+              data_info["prev-not-found"] += 1
+              data_info["prev-not-found-list"].append(GRAD_NAME)
+              LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + RED_TEXT + "(이전 연도 확인되지 않음.) " + MSG)
+            else:
+              LOGGER.info(" > 강의 계획서가 " + str(PRES_COUNT) + "개 " + GREEN_TEXT + "확인됨. " + YELLOW_TEXT + "(이전 연도 " + str(PREV_COUNT) + "개 확인됨.) " + MSG)
+      except:
+        PRES_COUNT = len(PRES_DATA["api"])
       
       data_info["pres-all-count"] += PRES_COUNT
       data_info["prev-all-count"] += PREV_COUNT
