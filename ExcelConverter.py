@@ -8,9 +8,7 @@
 #  The copyright indication and this authorization indication shall be
 #  recorded in all copies or in important parts of the Software.
 # 
-#  @author 0verfl0w767
 #  @link https://github.com/0verfl0w767
-#  @license MIT LICENSE
 #
 import subprocess
 import sys
@@ -34,7 +32,7 @@ install_requirements("requirements.txt")
 import os
 import json
 import openpyxl
-from openpyxl.styles import Color, PatternFill
+from openpyxl.styles import Color, PatternFill, Font
 from openpyxl.utils import get_column_letter
 
 from utils.Logger import Logger
@@ -120,7 +118,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
     
     with open(ABS_PATH_3, "r", encoding="utf-8") as f:
       PRES_DATA = json.load(f)
-      PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
+      PREV_YEAR = int(ABS_PATH_3.split("\\")[6]) - 1
       PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
       
       try:
@@ -214,7 +212,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       for key, value in direction.items():
         if value["count"] > 1:
           directionCount += value["count"] - 1
-          LOGGER.warnning(" >> " + RED_TEXT + "강의 계획서에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
+          LOGGER.warning(" >> " + RED_TEXT + "강의 계획서에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
       
       if MANUAL_COUNT != 0:
         with open(MANUAL_PATH, "r", encoding="utf-8") as f:
@@ -227,12 +225,12 @@ for COLLEGE in os.listdir(ABS_PATH_1):
               newData["단과대학"] = COLLEGE
               del newData['순번']
               allAPI.append(newData)
-              LOGGER.warnning(" >> " + RED_TEXT + "강의 계획서에서 누락된 강좌가 발견되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
-              LOGGER.warnning(" >> " + PURPLE_B_TEXT + "누락된 강좌가 발견되어 데이터가 추가되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
+              LOGGER.warning(" >> " + RED_TEXT + "강의 계획서에서 누락된 강좌가 발견되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
+              LOGGER.warning(" >> " + PURPLE_B_TEXT + "누락된 강좌가 발견되어 데이터가 추가되었습니다. 강좌번호: " + newData["강좌번호"] + ", 과목명: " + newData["과목명"])
         
         for realData in PRES_DATA["api"]:
           if not realData["강좌번호"] in mfoundList:
-            LOGGER.warnning(" >> " + RED_TEXT + "수강 편람에서 누락된 강좌가 발견되었습니다. 강좌번호: " + realData["강좌번호"] + ", 과목명: " + realData["과목명"])
+            LOGGER.warning(" >> " + RED_TEXT + "수강 편람에서 누락된 강좌가 발견되었습니다. 강좌번호: " + realData["강좌번호"] + ", 과목명: " + realData["과목명"])
       
       MSG = RED_B_TEXT + "(실패) 데이터 값 없음" if PRES_COUNT == 0 or MANUAL_COUNT == 0 else BLUE_B_TEXT + "(통과)" if PRES_COUNT == MANUAL_COUNT else RED_B_TEXT + "(실패) 누락 확인 바람"
       LOGGER.info(" > 수강 편람이 " + str(MANUAL_COUNT) + "개 확인됨. ")
@@ -242,7 +240,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
       for key, value in manual.items():
         if value["count"] > 1:
           manualCount += value["count"] - 1
-          LOGGER.warnning(" >> " + RED_TEXT + "수강 편람에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
+          LOGGER.warning(" >> " + RED_TEXT + "수강 편람에서 중복된 강좌가 " + str(value["count"]) + "개 발견되었습니다. 강좌번호: " + key + ", 과목명: " + value["과목명"])
       
       LOGGER.info(" > 상태: " + MSG)
       DIRECT_COUNT = PRES_COUNT - directionCount
@@ -273,19 +271,21 @@ with open(JSON_PATH, "w", encoding="utf-8") as f:
 excelWB = openpyxl.Workbook()
 sheet = excelWB.active
 
-sheet.column_dimensions["A"].width = 9 # 강좌번호
-sheet.column_dimensions["B"].width = 9 # 과목코드
+sheet.column_dimensions["A"].width = 8 # 강좌번호
+sheet.column_dimensions["B"].width = 8 # 과목코드
 sheet.column_dimensions["C"].width = 35 # 과목명
 sheet.column_dimensions["D"].width = 18 # 학부(과)
-sheet.column_dimensions["E"].width = 5 # 학년
+sheet.column_dimensions["E"].width = 4 # 학년
 sheet.column_dimensions["F"].width = 9 # 이수구분
 sheet.column_dimensions["G"].width = 15 # 영역구분
-sheet.column_dimensions["H"].width = 5 # 학점
-sheet.column_dimensions["I"].width = 7 # 교수명
+sheet.column_dimensions["H"].width = 4 # 학점
+sheet.column_dimensions["I"].width = 10 # 교수명
 sheet.column_dimensions["J"].width = 12 # 수업시간
 sheet.column_dimensions["K"].width = 30 # 장소
 sheet.column_dimensions["L"].width = 12 # 단과대학
-# sheet.column_dimensions["M"].width = 25 # 비고
+sheet.column_dimensions["M"].width = 25 # 비고
+sheet.column_dimensions["N"].width = 10 # 팀티칭여부
+
 
 sheet["A1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
 sheet["B1"].fill = PatternFill(fill_type="solid", fgColor=Color("29CDFF"))
@@ -319,6 +319,10 @@ sheet["L1"] = "단과대학"
 sheet["M1"] = "비고"
 sheet["N1"] = "팀티칭여부"
 
+for col in range(1, 15):
+  cell = sheet.cell(row=1, column=col)
+  cell.font = Font(name="맑은 고딕", bold=True)
+
 with open(JSON_PATH, "r", encoding="utf-8") as f:
   PRES_DATA = json.load(f)
   rowCount = 1
@@ -341,6 +345,10 @@ with open(JSON_PATH, "r", encoding="utf-8") as f:
     sheet["L" + str(rowCount)] = realData["단과대학"]
     sheet["M" + str(rowCount)] = realData["비고"]
     sheet["N" + str(rowCount)] = realData["팀티칭여부"]
+
+
+# sheet.protection.sheet = True
+# sheet.protection.enable()
     
 excelWB.save(XLSX_PATH)
 excelWB.close()

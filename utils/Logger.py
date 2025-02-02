@@ -8,9 +8,7 @@
 #  The copyright indication and this authorization indication shall be
 #  recorded in all copies or in important parts of the Software.
 # 
-#  @author 0verfl0w767
 #  @link https://github.com/0verfl0w767
-#  @license MIT LICENSE
 #
 import datetime
 import sys
@@ -24,26 +22,23 @@ class Logger:
   
   def logo(self) -> None:
     logo = f"""
-                                           __                                         _           __ 
-              _______  ____  __      _____/ /___ ___________      ____  _________    (_)__  _____/ /_
-             / ___/ / / / / / /_____/ ___/ / __ `/ ___/ ___/_____/ __ \/ ___/ __ \  / / _ \/ ___/ __/
-            (__  ) /_/ / /_/ /_____/ /__/ / /_/ (__  |__  )_____/ /_/ / /  / /_/ / / /  __/ /__/ /_  
-           /____/\__, /\__,_/      \___/_/\__,_/____/____/     / .___/_/   \____/_/ /\___/\___/\__/  
-                /____/                                        /_/              /___/                 
-          
-          Unofficial su-wings (SAHMYOOK UNIV.) lecture information system.
-          Github: https://github.com/syu-kr/lecture.syu.kr-everytime
-          Author: 0verfl0w767 (https://github.com/0verfl0w767)
-          Version: 1.0v
-          License: MIT LICENSE
-          
+
+     .d8888b.  888     888 888       888 8888888 888b    888  .d8888b.   .d8888b.        .d8888b.   .d88888b.  888b    888 888     888 8888888888 8888888b. 88888888888 8888888888 8888888b.  
+    d88P  Y88b 888     888 888   o   888   888   8888b   888 d88P  Y88b d88P  Y88b      d88P  Y88b d88P" "Y88b 8888b   888 888     888 888        888   Y88b    888     888        888   Y88b 
+    Y88b.      888     888 888  d8b  888   888   88888b  888 888    888 Y88b.           888    888 888     888 88888b  888 888     888 888        888    888    888     888        888    888 
+     "Y888b.   888     888 888 d888b 888   888   888Y88b 888 888         "Y888b.        888        888     888 888Y88b 888 Y88b   d88P 8888888    888   d88P    888     8888888    888   d88P 
+        "Y88b. 888     888 888d88888b888   888   888 Y88b888 888  88888     "Y88b.      888        888     888 888 Y88b888  Y88b d88P  888        8888888P"     888     888        8888888P"  
+          "888 888     888 88888P Y88888   888   888  Y88888 888    888       "888      888    888 888     888 888  Y88888   Y88o88P   888        888 T88b      888     888        888 T88b   
+    Y88b  d88P Y88b. .d88P 8888P   Y8888   888   888   Y8888 Y88b  d88P Y88b  d88P      Y88b  d88P Y88b. .d88P 888   Y8888    Y888P    888        888  T88b     888     888        888  T88b  
+     "Y8888P"   "Y88888P"  888P     Y888 8888888 888    Y888  "Y8888P88  "Y8888P"        "Y8888P"   "Y88888P"  888    Y888     Y8P     8888888888 888   T88b    888     8888888888 888   T88b
+     
     """
     sys.stdout.write(logo + "\n")
   
   def info(self, text: str) -> None:
     sys.stdout.write("[" + self.getTime() + "] [INFO] " + text + "\033[0m" + "\n")
   
-  def warnning(self, text: str) -> None:
+  def warning(self, text: str) -> None:
     sys.stdout.write("[" + self.getTime() + "] [WARNNING] " + text + "\033[0m" + "\n")
   
   def debuggerInfo(self, text: str) -> None:
