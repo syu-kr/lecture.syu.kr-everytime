@@ -118,7 +118,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
     
     with open(ABS_PATH_3, "r", encoding="utf-8") as f:
       PRES_DATA = json.load(f)
-      PREV_YEAR = int(ABS_PATH_3.split("\\")[6]) - 1
+      PREV_YEAR = int(ABS_PATH_3.split("\\")[7]) - 1
       PREV_PATH = ABS_PATH_3.replace(year, str(PREV_YEAR))
       
       try:
