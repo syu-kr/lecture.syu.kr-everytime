@@ -91,7 +91,7 @@ with open("config.json", "r", encoding="utf-8") as f:
 if not os.path.exists(os.path.join(os.path.dirname(__file__), folder_path)):
   os.makedirs(os.path.join(os.path.dirname(__file__), folder_path))
 
-REAL_PATH = data_path + "\\" + year + "\\" + semester
+REAL_PATH = os.path.join(data_path, year, semester)
 ABS_PATH_1 = os.path.abspath(REAL_PATH)
 
 FILE_NAME = year + "년 " + semester + " 시간표"
@@ -103,13 +103,13 @@ LOGGER.info(FILE_NAME)
 allAPI = []
 
 for COLLEGE in os.listdir(ABS_PATH_1):
-  ABS_PATH_2 = os.path.abspath(ABS_PATH_1 + "\\" + COLLEGE)
+  ABS_PATH_2 = os.path.abspath(os.path.join(ABS_PATH_1, COLLEGE))
   
   if COLLEGE == "수강편람" or COLLEGE == "전체대학" or COLLEGE == "학부(과).json":
     continue
   
   for UNDERGRADUATE in os.listdir(ABS_PATH_2):
-    ABS_PATH_3 = os.path.abspath(ABS_PATH_2 + "\\" + UNDERGRADUATE)
+    ABS_PATH_3 = os.path.abspath(os.path.join(ABS_PATH_2, UNDERGRADUATE))
     GRAD_NAME = os.path.splitext(UNDERGRADUATE)[0]
     
     LOGGER.info("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
@@ -185,7 +185,7 @@ for COLLEGE in os.listdir(ABS_PATH_1):
         
         manual = {}
         
-        MANUAL_PATH = os.path.abspath(ABS_PATH_1 + "\\" + "수강편람" + "\\" + UNDERGRADUATE)
+        MANUAL_PATH = os.path.abspath(os.path.join(ABS_PATH_1, "수강편람", UNDERGRADUATE))
         
         with open(MANUAL_PATH, "r", encoding="utf-8") as f:
           MANUAL_DATA = json.load(f)
@@ -267,7 +267,7 @@ days = ["월", "화", "수", "목", "금", "토", "일"]
 apiJson = {}
 apiJson["year"] = year
 apiJson["semester"] = semester
-apiJson["time"] = now.strftime(f"'%y.%m.%d.({days[now.weekday()]})")
+apiJson["time"] = now.strftime("%y.%m.%d.") + f"({days[now.weekday()]})"
 apiJson["api"] = sorted(allAPI, key=lambda i: (i["단과대학"], i["학부(과)"], 1 if i["과목명"] != "채플" else -1, int(i["학년"]), int(i["학점"]), i["과목명"], int(i["강좌번호"])))
 
 with open(JSON_PATH, "w", encoding="utf-8") as f:
@@ -346,7 +346,6 @@ with open(JSON_PATH, "r", encoding="utf-8") as f:
     sheet["I" + str(rowCount)] = realData["교수명"]
     sheet["J" + str(rowCount)] = realData["수업시간"]
     sheet["K" + str(rowCount)] = realData["장소"]
-    sheet["L" + str(rowCount)] = realData["단과대학"]
     sheet["L" + str(rowCount)] = realData["단과대학"]
     sheet["M" + str(rowCount)] = realData["비고"]
     sheet["N" + str(rowCount)] = realData["팀티칭여부"]
