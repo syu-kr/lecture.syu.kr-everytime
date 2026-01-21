@@ -267,7 +267,7 @@ days = ["월", "화", "수", "목", "금", "토", "일"]
 apiJson = {}
 apiJson["year"] = year
 apiJson["semester"] = semester
-apiJson["time"] = now.strftime("%y.%m.%d.") + f"({days[now.weekday()]})"
+apiJson["time"] = now.strftime(f"'%y.%m.%d.({days[now.weekday()]})")
 apiJson["api"] = sorted(allAPI, key=lambda i: (i["단과대학"], i["학부(과)"], 1 if i["과목명"] != "채플" else -1, int(i["학년"]), int(i["학점"]), i["과목명"], int(i["강좌번호"])))
 
 with open(JSON_PATH, "w", encoding="utf-8") as f:
